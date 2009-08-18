@@ -1,0 +1,87 @@
+#!/usr/bin/gnuplot
+
+# Terminal
+set term postscript eps monochrome size 10,7 "Helvetica" 20
+set output "@@OUT@@"
+
+# Labels
+set multiplot title "Collections for @@PRG@@ (@@COL@@ collector)"
+
+# Tics
+set xtics offset 0,graph 1.07
+#set xtics textcolor rgb 'white'
+set mxtics
+set ytics mirror
+set mytics
+set autoscale xfixmax
+set grid xtics ytics mxtics
+
+# Style
+set style fill solid noborder
+
+# Upper plot (space)
+set lmargin at screen 0.10
+set rmargin at screen 0.98
+set bmargin at screen 0.40
+set tmargin at screen 0.88
+
+# Reference
+set key reverse Left center at screen 0.5,0.92 horizontal
+
+# Labels
+set ylabel "Space (KiB)"
+set label 1 "After collection" at graph 0.02,0.03 left
+set label 2 "Before collection" at graph 0.02,0.97 left
+
+# Macros
+set macros
+black = "lc rgb 'black'"
+dgray = "lc rgb 'gray40'"
+lgray = "lc rgb 'gray70'"
+white = "lc rgb 'gray90'"
+
+# Plot
+set datafile separator ','
+plot '@@IN@@' \
+	   using 1:(($5+$6+$7+$8)/1024) title 'Overhead' with boxes @black, \
+	'' using 1:(($5+$6+$7)/1024)    title 'Wasted'   with boxes @lgray, \
+	'' using 1:(($5+$6)/1024)       title 'Free'     with boxes @dgray, \
+	'' using 1:($5/1024)            title 'Used'     with boxes @white, \
+	'' using 1:((-$9-$10-$11-$12)/1024) notitle      with boxes @black, \
+	'' using 1:((-$9-$10-$11)/1024)     notitle      with boxes @lgray, \
+	'' using 1:((-$9-$10)/1024)         notitle      with boxes @dgray, \
+	'' using 1:(-$9/1024)               notitle      with boxes @white, \
+	0 notitle with lines @black
+
+
+
+# Lower plot 2 (space)
+set bmargin at screen 0.10
+set tmargin at screen 0.40
+
+# Reference
+set key reverse Left center bmargin horizontal
+
+# Labels
+set ylabel "Time (seconds)"
+set xlabel "Program run time (seconds)"
+unset label 1
+unset label 2
+
+# Tics
+unset xtics
+set xtics
+
+# Macros
+set macros
+black = "lc rgb 'black'"
+gray  = "lc rgb 'gray40'"
+white = "lc rgb 'gray80'"
+
+# Plot
+set datafile separator ','
+plot '@@IN@@' \
+	   using 1:2 title 'Malloc'        with boxes @black, \
+	'' using 1:3 title 'Collect'       with boxes @gray, \
+	'' using 1:4 title 'Stop the word' with boxes @white
+
