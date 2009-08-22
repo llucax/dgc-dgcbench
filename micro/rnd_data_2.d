@@ -6,18 +6,20 @@
 
 import tango.math.random.Random;
 
+const N = 2_000_000;
+const L = 20;
+const I = 50; // original: 200
+
 int main(char[][] args)
 {
      int[][] stuff;
 
-     int NUM = 2_000_000;
-
-     stuff.length = 20;
+     stuff.length = L;
 
      auto rand = new Random();
 
-     for(int i = 0; i < 200; i++) {
-         int[] arr = new int[NUM];
+     for(int i = 0; i < I; i++) {
+         int[] arr = new int[N];
 
          for(int j = 0; j < arr.length; j++) {
              rand(arr[j]);
