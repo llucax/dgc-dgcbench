@@ -27,7 +27,6 @@ ifndef V
 P      = @
 P_DC   = @echo '  DC	$@';
 P_LD   = @echo '  LD	$@';
-P_CP   = @echo '  CP	$@';
 P_PLOT = @echo '  PLOT	$@';
 P_MAKE = @echo '  MAKE	$@';
 P_RUN  = @echo '  RUN	$<';
@@ -69,10 +68,6 @@ $(STAT_DIR)/%.c.csv $(STAT_DIR)/%.a.csv: $(BIN_DIR)/%
 	$P mv gc-collections.csv $(STAT_DIR)/$*.c.csv
 	$P mv gc-mallocs.csv $(STAT_DIR)/$*.a.csv
 
-$(STAT_DIR)/split.c.csv $(STAT_DIR)/split.a.csv: $(BIN_DIR)/bible.txt
-
-$(BIN_DIR)/bible.txt: bible.txt
-	$(P_CP) cp -l $< $@
 
 .PRECIOUS: $(STAT_DIR)/%.h.csv
 $(STAT_DIR)/%.h.csv: $(STAT_DIR)/%.a.csv
