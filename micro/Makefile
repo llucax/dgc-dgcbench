@@ -57,7 +57,6 @@ build: $(programs)
 $(BIN_DIR)/%: $(BIN_DIR)/%.o
 	$(P_LD) $(DC) $(DFLAGS) -of$@ $^
 
-.INTERMEDIATE: $(BIN_DIR)/%.o
 $(BIN_DIR)/%.o: %.d
 	$(P_DC) $(DC) $(DFLAGS) -c -of$@ $<
 
