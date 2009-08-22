@@ -7,8 +7,7 @@ DFLAGS  += -release -inline -O
 DFLAGS  += -defaultlib=tango-base-dmd-$(VERS) -debuglib=tango-base-dmd-$(VERS) \
 		-L-ltango-user-dmd-$(VERS)
 
-BASE_DIR  := build
-BUILD_DIR := $(BASE_DIR)/$(VERS)
+BUILD_DIR := $(VERS)
 BIN_DIR   := $(BUILD_DIR)/bin
 PLOT_DIR  := $(BUILD_DIR)/plot
 
@@ -73,9 +72,6 @@ $(PLOT_DIR)/split.c.csv $(PLOT_DIR)/split.a.csv: $(BIN_DIR)/bible.txt
 $(BIN_DIR)/bible.txt: bible.txt
 	$(P_CP) cp -l $< $@
 
-.PHONY: dist-clean
-dist-clean:
-	$(RM) -r $(BASE_DIR)
 
 .PHONY: clean
 clean:
