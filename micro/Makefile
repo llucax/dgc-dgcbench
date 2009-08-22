@@ -9,10 +9,15 @@ DFLAGS  += -defaultlib=tango-base-dmd-$(VERS) -debuglib=tango-base-dmd-$(VERS) \
 
 BUILD_DIR := $(VERS)
 BIN_DIR   := $(BUILD_DIR)/bin
+STAT_DIR  := $(BUILD_DIR)/stat
 PLOT_DIR  := $(BUILD_DIR)/plot
+DIRS      := $(BIN_DIR) $(STAT_DIR) $(PLOT_DIR)
 
 sources  := $(wildcard *.d)
 programs := $(addprefix $(BIN_DIR)/,$(sources:.d=))
+stat_c   := $(addprefix $(STAT_DIR)/,$(addsuffix .c.csv,$(sources:.d=)))
+stat_a   := $(addprefix $(STAT_DIR)/,$(addsuffix .a.csv,$(sources:.d=)))
+stat     := $(stat_c) $(stat_a)
 graphs_c := $(addprefix $(PLOT_DIR)/,$(addsuffix .c.eps,$(sources:.d=)))
 graphs   := $(graphs_c)
 
@@ -27,8 +32,8 @@ P_RUN  = @echo '  RUN	$<';
 endif
 
 # create build directories if they don't already exist
-ifneq ($(wildcard $(BIN_DIR) $(PLOT_DIR)),$(BIN_DIR) $(PLOT_DIR))
-dummy_mkdir := $(shell mkdir -p $(BIN_DIR) $(PLOT_DIR))
+ifneq ($(wildcard $(DIRS)),$(DIRS))
+dummy_mkdir := $(shell mkdir -p $(DIRS))
 endif
 
 # don't use Gold with old DMDs
@@ -53,25 +58,28 @@ $(BIN_DIR)/%: $(BIN_DIR)/%.o
 $(BIN_DIR)/%.o: %.d
 	$(P_DC) $(DC) $(DFLAGS) -c -of$@ $<
 
-.PHONY: plot
-plot: $(graphs)
+.PHONY: stat
+stat: $(stat)
 
-$(PLOT_DIR)/%.c.eps: $(PLOT_DIR)/%.c.csv plot-c.gpi
-	$(P_PLOT) \
-	sed 's|@@PRG@@|$(*F)|g; s|@@COL@@|$(VERS)|g; s|@@IN@@|$<|g; s|@@OUT@@|$@|g' \
-	$(word 2,$^) | $(GNUPLOT)
-
-.PRECIOUS: $(PLOT_DIR)/%.c.csv $(PLOT_DIR)/%.a.csv
-$(PLOT_DIR)/%.c.csv $(PLOT_DIR)/%.a.csv: $(BIN_DIR)/%
+.PRECIOUS: $(STAT_DIR)/%.c.csv $(STAT_DIR)/%.a.csv
+$(STAT_DIR)/%.c.csv $(STAT_DIR)/%.a.csv: $(BIN_DIR)/%
 	$(P_RUN) ./$<
-	$P mv gc-collections.csv $(PLOT_DIR)/$*.c.csv
-	$P mv gc-mallocs.csv $(PLOT_DIR)/$*.a.csv
+	$P mv gc-collections.csv $(STAT_DIR)/$*.c.csv
+	$P mv gc-mallocs.csv $(STAT_DIR)/$*.a.csv
 
-$(PLOT_DIR)/split.c.csv $(PLOT_DIR)/split.a.csv: $(BIN_DIR)/bible.txt
+$(STAT_DIR)/split.c.csv $(STAT_DIR)/split.a.csv: $(BIN_DIR)/bible.txt
 
 $(BIN_DIR)/bible.txt: bible.txt
 	$(P_CP) cp -l $< $@
 
+
+.PHONY: plot
+plot: $(graphs)
+
+$(PLOT_DIR)/%.c.eps: $(STAT_DIR)/%.c.csv plot-c.gpi
+	$(P_PLOT) sed "s|@@PRG@@|$(*F)|g; s|@@COL@@|$(VERS)|g; \
+			s|@@IN@@|$<|g; s|@@OUT@@|$@|g" $(lastword $^) \
+		| $(GNUPLOT)
 
 .PHONY: clean
 clean:
