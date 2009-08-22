@@ -4,7 +4,6 @@
 // (changed not to print anything and lower the total iterations; ported to
 // Tango)
 
-import tango.core.Memory;
 import tango.math.random.Random;
 
 int main(char[][] args)
@@ -14,8 +13,6 @@ int main(char[][] args)
      int NUM = 2_000_000;
 
      stuff.length = 20;
-
-     GC.disable();
 
      auto rand = new Random();
 
@@ -31,10 +28,6 @@ int main(char[][] args)
              zig = rand.uniform!(int) % stuff.length;
 
          stuff[zig] = arr;
-
-         if (i == 20) {
-             GC.enable();
-         }
      }
 
      return 0;
