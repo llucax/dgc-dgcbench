@@ -4,6 +4,9 @@
 // (changed not to print anything and lower the total iterations; ported to
 // Tango)
 
+// Total residency should be ~160 MiB, but it usually increases a lot because
+// of false positives (probably in the static memory area)
+
 import tango.math.random.Random;
 
 const N = 2_000_000;
