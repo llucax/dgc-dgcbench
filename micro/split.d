@@ -8,9 +8,12 @@ import tango.text.Util: delimit;
 import tango.util.Convert: to;
 
 int main(char[][] args) {
-	auto txt = cast(byte[]) File.get("bible.txt");
-	auto n = (args.length > 1) ? to!(uint)(args[1]) : 1;
-	if (n < 1) n = 1;
+	if (args.length < 2)
+		return 1;
+	auto txt = cast(byte[]) File.get(args[1]);
+	auto n = (args.length > 2) ? to!(uint)(args[2]) : 1;
+	if (n < 1)
+		n = 1;
 	while (--n)
 		txt ~= txt;
 	auto words = delimit!(byte)(txt, cast(byte[]) " \t\n\r");

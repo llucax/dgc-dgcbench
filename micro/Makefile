@@ -29,7 +29,7 @@ P_DC   = @echo '  DC	$@';
 P_LD   = @echo '  LD	$@';
 P_PLOT = @echo '  PLOT	$@';
 P_MAKE = @echo '  MAKE	$@';
-P_RUN  = @echo '  RUN	$<';
+P_RUN  = @echo '  RUN	$< $(arg1) $(arg2) $(arg3)';
 P_AWK  = @echo '  AWK	$@';
 endif
 
@@ -64,10 +64,12 @@ stat: $(stat)
 
 .PRECIOUS: $(STAT_DIR)/%.c.csv $(STAT_DIR)/%.a.csv
 $(STAT_DIR)/%.c.csv $(STAT_DIR)/%.a.csv: $(BIN_DIR)/%
-	$(P_RUN) ./$<
+	$(P_RUN) ./$< $(args)
 	$P mv gc-collections.csv $(STAT_DIR)/$*.c.csv
 	$P mv gc-mallocs.csv $(STAT_DIR)/$*.a.csv
 
+# special command line arguments for benchmarks
+$(STAT_DIR)/split.c.csv $(STAT_DIR)/split.a.csv: override args := bible.txt
 
 .PRECIOUS: $(STAT_DIR)/%.h.csv
 $(STAT_DIR)/%.h.csv: $(STAT_DIR)/%.a.csv
