@@ -72,9 +72,8 @@ $(STAT_DIR)/%.c.csv $(STAT_DIR)/%.a.csv: $(BIN_DIR)/%
 $(STAT_DIR)/split.c.csv $(STAT_DIR)/split.a.csv: override args := bible.txt
 
 .PRECIOUS: $(STAT_DIR)/%.h.csv
-$(STAT_DIR)/%.h.csv: $(STAT_DIR)/%.a.csv
-	$(P_AWK) awk -F, 'BEGIN  { print "Size,Count" } NR > 1 { a[$$3]++ } \
-			END { for (i in a) print i "," a[i] }' $< | sort > $@
+$(STAT_DIR)/%.h.csv: $(STAT_DIR)/%.a.csv hist.awk
+	$(P_AWK) awk -F, -f $(lastword $^) $< > $@
 
 .PHONY: plot
 plot: $(graphs)
