@@ -1,48 +1,57 @@
 #!/usr/bin/gnuplot
 
 # Terminal
-set term postscript eps monochrome size 10,7 "Helvetica" 20
+set term postscript eps monochrome size 18cm,27cm 16
 set output "@@OUT@@"
 
-# Labels
-set multiplot title "Collections for @@PRG@@ (@@COL@@ collector)"
+# Title
+set multiplot
+set label 1 "@@PRG@@ (@@COL@@ collector)" center at screen 0.5,0.987 \
+		font "Helvetiva,24"
 
-# Tics
-set xtics offset 0,graph 1.07
-#set xtics textcolor rgb 'white'
-set mxtics
-set ytics mirror
-set mytics
-set autoscale xfixmax
-set grid xtics ytics mxtics
-
-# Style
-set style fill solid noborder
-
-# Upper plot (space)
-set lmargin at screen 0.10
-set rmargin at screen 0.98
-set bmargin at screen 0.40
-set tmargin at screen 0.88
-
-# Reference
-set key reverse Left center at screen 0.5,0.92 horizontal
-
-# Labels
-set ylabel "Space (KiB)"
-set label 1 "After collection" at graph 0.02,0.03 left
-set label 2 "Before collection" at graph 0.02,0.97 left
-
-# Macros
+# Style Macros
 set macros
 black = "lc rgb 'black'"
 dgray = "lc rgb 'gray40'"
 lgray = "lc rgb 'gray70'"
 white = "lc rgb 'gray90'"
 
-# Plot
+# Tics
+set xtics offset 0,graph 1.05
+set mxtics
+set ytics mirror
+set mytics
+set autoscale xfixmax
+set grid xtics ytics mxtics front lc rgb 'gray20'
+
+# Style
+set style fill solid noborder
+
+# Data format
 set datafile separator ','
-plot '@@IN@@' \
+
+# Margins
+set lmargin at screen 0.10
+set rmargin at screen 0.90
+
+
+
+# Collection space plot (1)
+##############################################################################
+set bmargin at screen 0.62
+set tmargin at screen 0.96
+
+# Reference
+set key reverse Left left top box horizontal
+
+# Labels
+set ylabel "Space (KiB)"   offset 1.5,0
+set y2label "Collections"  offset 2.5,0
+set label 2 "After Collection"  at graph 0.01,0.03 left
+set label 3 "Before Collection" at graph 0.01,0.93 left
+
+# Plot
+plot '@@INC@@' \
 	   using 1:(($5+$6+$7+$8)/1024) title 'Overhead' with boxes @black, \
 	'' using 1:(($5+$6+$7)/1024)    title 'Wasted'   with boxes @lgray, \
 	'' using 1:(($5+$6)/1024)       title 'Free'     with boxes @dgray, \
@@ -50,38 +59,86 @@ plot '@@IN@@' \
 	'' using 1:((-$9-$10-$11-$12)/1024) notitle      with boxes @black, \
 	'' using 1:((-$9-$10-$11)/1024)     notitle      with boxes @lgray, \
 	'' using 1:((-$9-$10)/1024)         notitle      with boxes @dgray, \
-	'' using 1:(-$9/1024)               notitle      with boxes @white, \
-	0 notitle with lines @black
+	'' using 1:(-$9/1024)               notitle      with boxes @white
 
 
 
-# Lower plot 2 (space)
-set bmargin at screen 0.10
-set tmargin at screen 0.40
-
-# Reference
-set key reverse Left center bmargin horizontal
+# Collection time plot (2)
+##############################################################################
+set bmargin at screen 0.42
+set tmargin at screen 0.62
 
 # Labels
 set ylabel "Time (seconds)"
-set xlabel "Program run time (seconds)"
+set y2label "Collections"
 unset label 1
 unset label 2
+unset label 3
+
+# Tics
+set xtics format ""
+
+# Plot
+plot '@@INC@@' \
+	   using 1:2 title 'Malloc'        with boxes @black, \
+	'' using 1:3 title 'Collect'       with boxes @dgray, \
+	'' using 1:4 title 'Stop the Word' with boxes @white
+
+
+
+# Allocation size/time plot (3)
+##############################################################################
+set bmargin at screen 0.22
+set tmargin at screen 0.42
+
+# Labels
+set ylabel  "Allocation Size (KiB)"
+set y2label "Allocation Time (seconds)"  offset -1.5,0
+set xlabel  "Program Run Time (seconds)" offset 0,0.4
 
 # Tics
 unset xtics
-set xtics
-
-# Macros
-set macros
-black = "lc rgb 'black'"
-gray  = "lc rgb 'gray40'"
-white = "lc rgb 'gray80'"
+set xtics format "% g"
+set ytics nomirror
+set y2tics
 
 # Plot
-set datafile separator ','
-plot '@@IN@@' \
-	   using 1:2 title 'Malloc'        with boxes @black, \
-	'' using 1:3 title 'Collect'       with boxes @gray, \
-	'' using 1:4 title 'Stop the word' with boxes @white
+plot '@@INA@@' \
+	   using 1:($3/1024) title 'Size' with points @black, \
+	'' using 1:2         title 'Time' with points @dgray axes x1y2
+
+
+
+# Allocation histogram plot (4)
+##############################################################################
+set bmargin at screen 0.04
+set tmargin at screen 0.18
+
+# Histogram settings
+set style data histograms
+set style histogram rowstacked
+set style fill solid 1.0 border -1
+set boxwidth 0.75
+
+# Reference
+set key left at graph 0,1.085
+
+# Labels
+set ylabel  "Number of Allocations" offset 1.6,0
+set y2label "Allocation Histogram"  offset 2.5,0
+set xlabel "Size (bytes)" offset screen -0.45,screen 0.02
+
+# Tics
+unset xtics
+unset y2tics
+unset ymtics
+unset y2mtics
+set xtics scale 0 rotate by -45 (@@TICS@@) font "Helvetica,13"
+set ytics mirror
+set grid ytics noxtics back
+
+# Plot
+plot '@@INH@@' \
+	   using 2 title column @dgray, \
+	'' using 3 title column @lgray
 

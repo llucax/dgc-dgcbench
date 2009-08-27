@@ -82,9 +82,12 @@ plot: $(graphs)
 $(PLOT_DIR)/%.tics: $(STAT_DIR)/%.h.csv tics.awk
 	$(P_AWK) awk -F, -f $(lastword $^) $< > $@
 
-$(PLOT_DIR)/%.c.eps: $(STAT_DIR)/%.c.csv plot-c.gpi
+$(PLOT_DIR)/%.c.eps: $(STAT_DIR)/%.c.csv $(STAT_DIR)/%.a.csv \
+			$(STAT_DIR)/%.h.csv $(PLOT_DIR)/%.tics plot-c.gpi
 	$(P_PLOT) sed "s|@@PRG@@|$(*F)|g; s|@@COL@@|$(VERS)|g; \
-			s|@@IN@@|$<|g; s|@@OUT@@|$@|g" $(lastword $^) \
+			s|@@INC@@|$(word 1,$^)|g; s|@@INA@@|$(word 2,$^)|g; \
+			s|@@INH@@|$(word 3,$^)|g; s|@@OUT@@|$@|g; \
+			s|@@TICS@@|$(shell cat $(word 4,$^))|g" $(word 5,$^) \
 		| $(GNUPLOT)
 
 .PHONY: clean
