@@ -3,7 +3,6 @@
 // Modified by Leandro Lucarella
 // (ported to Tango)
 
-import tango.io.Stdout;
 import tango.util.Convert;
 
 alias char[] string;
@@ -17,8 +16,6 @@ int main(string[] args)
 	int stretchDepth = maxDepth + 1;
 
 	TreeNode stretchTree = TreeNode.BottomUpTree(0, stretchDepth);
-	//Stdout("stretch tree of depth ")(stretchDepth)("\t check: ")
-	//		(stretchTree.ItemCheck);
 
 	TreeNode longLivedTree = TreeNode.BottomUpTree(0, maxDepth);
 
@@ -38,12 +35,7 @@ int main(string[] args)
 			//delete tempTree;
 		}
 
-		//Stdout(iterations * 2)("\t trees of depth ")(depth)
-		//		("\t check: ")(check);
 	}
-
-	//Stdout("long lived tree of depth ")(maxDepth)("\t check: ")
-	//		(longLivedTree.ItemCheck);
 
 	return 0;
 }
