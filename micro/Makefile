@@ -78,6 +78,10 @@ $(STAT_DIR)/%.h.csv: $(STAT_DIR)/%.a.csv hist.awk
 .PHONY: plot
 plot: $(graphs)
 
+.PRECIOUS: $(PLOT_DIR)/%.tics
+$(PLOT_DIR)/%.tics: $(STAT_DIR)/%.h.csv tics.awk
+	$(P_AWK) awk -F, -f $(lastword $^) $< > $@
+
 $(PLOT_DIR)/%.c.eps: $(STAT_DIR)/%.c.csv plot-c.gpi
 	$(P_PLOT) sed "s|@@PRG@@|$(*F)|g; s|@@COL@@|$(VERS)|g; \
 			s|@@IN@@|$<|g; s|@@OUT@@|$@|g" $(lastword $^) \
