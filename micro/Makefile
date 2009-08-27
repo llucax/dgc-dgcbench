@@ -19,7 +19,7 @@ stat_c   := $(addprefix $(STAT_DIR)/,$(addsuffix .c.csv,$(sources:.d=)))
 stat_a   := $(addprefix $(STAT_DIR)/,$(addsuffix .a.csv,$(sources:.d=)))
 stat_h   := $(addprefix $(STAT_DIR)/,$(addsuffix .h.csv,$(sources:.d=)))
 stat     := $(stat_c) $(stat_a) $(stat_h)
-graphs_c := $(addprefix $(PLOT_DIR)/,$(addsuffix .c.eps,$(sources:.d=)))
+graphs_c := $(addprefix $(PLOT_DIR)/,$(addsuffix .eps,$(sources:.d=)))
 graphs   := $(graphs_c)
 
 
@@ -82,8 +82,8 @@ plot: $(graphs)
 $(PLOT_DIR)/%.tics: $(STAT_DIR)/%.h.csv tics.awk
 	$(P_AWK) awk -F, -f $(lastword $^) $< > $@
 
-$(PLOT_DIR)/%.c.eps: $(STAT_DIR)/%.c.csv $(STAT_DIR)/%.a.csv \
-			$(STAT_DIR)/%.h.csv $(PLOT_DIR)/%.tics plot-c.gpi
+$(PLOT_DIR)/%.eps: $(STAT_DIR)/%.c.csv $(STAT_DIR)/%.a.csv \
+			$(STAT_DIR)/%.h.csv $(PLOT_DIR)/%.tics plot.gpi
 	$(P_PLOT) sed "s|@@PRG@@|$(*F)|g; s|@@COL@@|$(VERS)|g; \
 			s|@@INC@@|$(word 1,$^)|g; s|@@INA@@|$(word 2,$^)|g; \
 			s|@@INH@@|$(word 3,$^)|g; s|@@OUT@@|$@|g; \
