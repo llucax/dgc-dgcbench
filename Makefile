@@ -3,9 +3,8 @@ VERS    := naive
 DC      := dmd
 DL      := dmd
 GNUPLOT := gnuplot
+DFLAGS  += -defaultlib=tango-base-dmd-$(VERS) -debuglib=tango-base-dmd-$(VERS)
 DFLAGS  += -release -inline -O
-DFLAGS  += -defaultlib=tango-base-dmd-$(VERS) -debuglib=tango-base-dmd-$(VERS) \
-		-L-ltango-user-dmd-$(VERS)
 
 O := $(VERS)
 
