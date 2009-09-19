@@ -59,7 +59,7 @@ $O/%: %.d
 
 .PRECIOUS: $O/%.c.csv $O/%.a.csv
 $O/%.c.csv $O/%.a.csv: $O/%
-	$(P_RUN) ./$< $(args)
+	$(P_RUN) D_GC_STATS=1 ./$< $(args)
 	$P mv gc-collections.csv $O/$*.c.csv
 	$P mv gc-mallocs.csv $O/$*.a.csv
 
