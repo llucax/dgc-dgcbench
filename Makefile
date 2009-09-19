@@ -25,7 +25,7 @@ dummy_mkdir := $(shell mkdir -p $O)
 endif
 
 # don't use Gold with old DMDs
-ifneq ($(shell ld --version | grep gold),)
+ifneq ($(strip $(shell ld --version | grep gold)),)
 export LD_ := /usr/bin/ld.single
 endif
 
