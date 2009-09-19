@@ -8,13 +8,11 @@ DFLAGS  += -release -inline -O
 
 O := $(VERS)
 
-micro_src := $(wildcard micro/*.d)
-
 ifndef V
 P      = @
-P_DC   = @printf '   DC    %- 40s <-  %s\n' '$@' '$<';
-P_LD   = @printf '   LD    %- 40s <-  %s\n' '$@' '$^';
-P_PLOT = @printf '   PLOT  %- 40s <-  %s\n' '$@' '$< ...';
+P_DC   = @printf '   DC    %- 40s <-  %s\n' '$@' '$(if \
+		$(subst 1,,$(words $^)),$< ... $(lastword $^),$<)';
+P_PLOT = @printf '   PLOT  %- 40s <-  %s\n' '$@' '$(filter %.csv,$^)';
 P_AWK  = @printf '   AWK   %- 40s <-  %s\n' '$@' '$<';
 P_RUN  = @printf '   RUN   $< $(args)\n';
 P_MAKE = @printf '   MAKE  $@\n';
@@ -38,11 +36,26 @@ all: naive
 naive basic:
 	$(P_MAKE) $(MAKE) --no-print-directory micro VERS=$@
 
-$O/%: $O/%.o
-	$(P_LD) $(DC) $(DFLAGS) -of$@ $^
 
-$O/%.o: %.d
-	$(P_DC) $(DC) $(DFLAGS) -c -of$@ $<
+# micro
+########
+
+.PHONY: build-micro
+build-micro: $(patsubst %.d,$O/%,$(wildcard micro/*.d))
+
+.PHONY: micro
+micro: $(patsubst %.d,$O/%.eps,$(wildcard micro/*.d))
+
+# special command line arguments 'split' micro benchmark
+$O/micro/split.c.csv $O/micro/split.a.csv: override args := micro/bible.txt
+
+
+# common rules
+###############
+
+.PRECIOUS: $O/%
+$O/%: %.d
+	$(P_DC) $(DC) $(DFLAGS) -of$@ $^
 
 .PRECIOUS: $O/%.c.csv $O/%.a.csv
 $O/%.c.csv $O/%.a.csv: $O/%
@@ -50,22 +63,15 @@ $O/%.c.csv $O/%.a.csv: $O/%
 	$P mv gc-collections.csv $O/$*.c.csv
 	$P mv gc-mallocs.csv $O/$*.a.csv
 
-# special command line arguments for benchmarks
-$O/micro/split.c.csv $O/micro/split.a.csv: override args := micro/bible.txt
-
 .PRECIOUS: $O/%.h.csv
 $O/%.h.csv: $O/%.a.csv hist.awk
 	$(P_AWK) awk -F, -f $(lastword $^) $< > $@
-
-.PHONY: micro
-micro: $(patsubst %.d,$O/%.eps,$(micro_src))
 
 .PRECIOUS: $O/%.tics
 $O/%.tics: $O/%.h.csv tics.awk
 	$(P_AWK) awk -F, -f $(lastword $^) $< > $@
 
-$O/%.eps: $O/%.c.csv $O/%.a.csv \
-			$O/%.h.csv $O/%.tics plot.gpi
+$O/%.eps: $O/%.c.csv $O/%.a.csv $O/%.h.csv $O/%.tics plot.gpi
 	$(P_PLOT) sed "s|@@PRG@@|$(*F)|g; s|@@COL@@|$(VERS)|g; \
 			s|@@INC@@|$(word 1,$^)|g; s|@@INA@@|$(word 2,$^)|g; \
 			s|@@INH@@|$(word 3,$^)|g; s|@@OUT@@|$@|g; \
