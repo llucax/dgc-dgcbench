@@ -29,7 +29,7 @@ int main(char[][] args)
          }
 
          int zig = i;
-         if (zig > stuff.length)
+         if (zig >= stuff.length)
              zig = rand.uniform!(int) % stuff.length;
 
          stuff[zig] = arr;
