@@ -2,9 +2,11 @@
 VERS    := naive
 DC      := dmd
 DL      := dmd
+LN      := ln
 GNUPLOT := gnuplot
+DFLAGS  += -g -release -inline -O
+#DFLAGS  := -gc
 DFLAGS  += -defaultlib=tango-base-dmd-$(VERS) -debuglib=tango-base-dmd-$(VERS)
-DFLAGS  += -release -inline -O
 
 O := $(VERS)
 
@@ -17,6 +19,7 @@ P_AWK  = @printf '   AWK   %- 40s <-  %s\n' '$@' '$<';
 P_RUN  = @printf '   RUN   $< $(args)\n';
 P_MAKE = @printf '   MAKE  $@\n';
 P_RM   = @printf '   RM    $^\n';
+P_LN   = @printf '   LN    %- 40s <-  %s\n' '$@' '$<';
 endif
 
 # create build directories if they don't already exist
@@ -36,7 +39,7 @@ all: naive
 
 .PHONY: naive basic
 naive basic:
-	$(P_MAKE) $(MAKE) --no-print-directory micro VERS=$@
+	$(P_MAKE) $(MAKE) --no-print-directory micro dil VERS=$@
 
 
 # micro
@@ -50,6 +53,20 @@ micro: $(patsubst %.d,$O/%.eps,$(wildcard micro/*.d))
 
 # special command line arguments 'split' micro benchmark
 $O/micro/split.c.csv $O/micro/split.a.csv: override args := micro/bible.txt
+
+
+# dil
+######
+
+.PHONY: dil
+dil: $O/dil_nop.eps
+
+$O/dil: $(wildcard dil/src/*.d dil/src/cmd/*.d dil/src/util/*.d \
+			dil/src/dil/*.d dil/src/dil/*/*.d)
+	$(P_DC) $(DC) $(DFLAGS) -L-lmpfr -Idil/src -of$@ $^
+
+$O/dil_nop: $O/dil
+	@$(P_LN) $(LN) -sf $(<F) $@
 
 
 # common rules
