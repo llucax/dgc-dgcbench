@@ -16,14 +16,6 @@ dgray = "lc rgb 'gray40'"
 lgray = "lc rgb 'gray70'"
 white = "lc rgb 'gray90'"
 
-# Tics
-set xtics offset 0,graph 1.05
-set mxtics
-set ytics mirror
-set mytics
-set autoscale xfixmax
-set grid xtics ytics mxtics front lc rgb 'gray20'
-
 # Style
 set style fill solid noborder
 
@@ -36,37 +28,70 @@ set rmargin at screen 0.90
 
 
 
-# Collection space plot (1)
+# Collection space (before) plot (1)
 ##############################################################################
-set bmargin at screen 0.62
+set bmargin at screen 0.79
 set tmargin at screen 0.96
 
 # Reference
 set key reverse Left left top box horizontal
 
 # Labels
-set ylabel "Space (KiB)"   offset 1.5,0
-set y2label "Collections"  offset 2.5,0
-set label 2 "After Collection"  at graph 0.01,0.03 left
-set label 3 "Before Collection" at graph 0.01,0.93 left
+set ylabel "Space (KiB)"        offset 1.5,graph -0.5
+set y2label " BeforeCollection" offset 2.5,0
+
+# Tics
+set xtics offset 0,graph 1.1
+set mxtics
+set ytics mirror
+set mytics
+set autoscale xfixmax
+set grid xtics ytics mxtics front lc rgb 'gray20'
 
 # Plot
 plot '@@INC@@' \
 	   using 1:(($5+$6+$7+$8)/1024) title 'Overhead' with boxes @black, \
 	'' using 1:(($5+$6+$7)/1024)    title 'Wasted'   with boxes @lgray, \
 	'' using 1:(($5+$6)/1024)       title 'Free'     with boxes @dgray, \
-	'' using 1:($5/1024)            title 'Used'     with boxes @white, \
-	'' using 1:((-$9-$10-$11-$12)/1024) notitle      with boxes @black, \
-	'' using 1:((-$9-$10-$11)/1024)     notitle      with boxes @lgray, \
-	'' using 1:((-$9-$10)/1024)         notitle      with boxes @dgray, \
-	'' using 1:(-$9/1024)               notitle      with boxes @white
+	'' using 1:($5/1024)            title 'Used'     with boxes @white
 
 
 
-# Collection time plot (2)
+# Collection space (after) plot (2)
+##############################################################################
+set bmargin at screen 0.62
+set tmargin at screen 0.79
+
+# Reference
+unset key
+
+# Labels
+unset ylabel
+set y2label "After Collection" offset 2.5,0
+
+# Range
+set yrange [] reverse
+set y2range [] reverse
+
+# Tics
+set xtics format ""
+
+# Plot
+plot '@@INC@@' \
+	   using 1:(($9+$10+$11+$12)/1024) notitle with boxes @black, \
+	'' using 1:(($9+$10+$11)/1024)     notitle with boxes @lgray, \
+	'' using 1:(($9+$10)/1024)         notitle with boxes @dgray, \
+	'' using 1:($9/1024)               notitle with boxes @white
+
+
+
+# Collection time plot (3)
 ##############################################################################
 set bmargin at screen 0.42
 set tmargin at screen 0.62
+
+# Reference
+set key reverse Left left top box horizontal
 
 # Labels
 set ylabel "Time (seconds)"
@@ -74,6 +99,10 @@ set y2label "Collections"
 unset label 1
 unset label 2
 unset label 3
+
+# Range
+set yrange [] noreverse
+set y2range [] noreverse
 
 # Tics
 set xtics format ""
@@ -86,7 +115,7 @@ plot '@@INC@@' \
 
 
 
-# Allocation size/time plot (3)
+# Allocation size/time plot (4)
 ##############################################################################
 set bmargin at screen 0.22
 set tmargin at screen 0.42
@@ -109,7 +138,7 @@ plot '@@INA@@' \
 
 
 
-# Allocation histogram plot (4)
+# Allocation histogram plot (5)
 ##############################################################################
 set bmargin at screen 0.04
 set tmargin at screen 0.18
