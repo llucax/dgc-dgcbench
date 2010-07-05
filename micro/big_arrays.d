@@ -3,9 +3,9 @@
 // Sightly modified by Leandro Lucarella <llucax@gmail.com>
 // (some readability improvements and output removed)
 
-const IT = 100; // original: 300
-const N1 = 200; // original: 20_000
-const N2 = 400; // original: 40_000
+const IT = 300;
+const N1 = 20_000;
+const N2 = 40_000;
 
 class Individual
 {

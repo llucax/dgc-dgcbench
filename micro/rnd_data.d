@@ -5,7 +5,7 @@
 
 import tango.math.random.Random;
 
-const IT = 5_000; // original: 50_000
+const IT = 50_000;
 
 void main() {
 	// The real memory use, ~55 KiB (original: ~20 MiB)

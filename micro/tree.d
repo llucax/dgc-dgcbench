@@ -25,8 +25,8 @@ TreeNode makeTree(int item, int depth) {
 }
 
 void main(char[][] args) {
-	const minDepth = 4;
-	int n = 6; // 13;
+	const minDepth = 5;
+	int n = 15;
 	int maxDepth = (minDepth + 2) > n ? minDepth + 2 : n;
 
 	int check = makeTree(0, maxDepth + 1).check;
