@@ -1,0 +1,3 @@
+[submodule "dil"]
+	path = dil
+	url = git://github.com/azizk/dil.git
