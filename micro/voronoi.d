@@ -1,5 +1,6 @@
 /*
 Translated by Leonardo Fantascienza, downloaded from http://codepad.org/xGDCS3KO
+Modified by Leandro Lucarella to be really quiet when -v is not used.
 
 A D implementation of the Voronoi Olden benchmark. Voronoi
 generates a random set of points and computes a Voronoi diagram for
@@ -899,9 +900,8 @@ struct Voronoi {
             printf("Build time %f\n", end0 - start0);
             printf("Compute  time %f\n", end1 - start1);
             printf("Total time %f\n", end1 - start0);
+            printf("Done!\n");
         }
-
-        printf("Done!\n");
     }
 
     /**
