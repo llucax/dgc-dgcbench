@@ -22,27 +22,20 @@ P_LN   = @printf '   LN    %- 40s <-  %s\n' '$@' '$<';
 endif
 
 # create build directories if they don't already exist
-ifneq ($(wildcard $O),$O)
-dummy_mkdir := $(shell mkdir -p $O $O/bin $O/stats)
-endif
-
-# don't use Gold with old DMDs
-ifeq ($(subst dmd,,$(DC)),)
-ifneq ($(strip $(shell ld --version | grep gold)),)
-export LD_ := /usr/bin/ld.single
-endif
-endif
+dummy_mkdir := $(shell mkdir -p $O $O/bin $O/time $O/stats)
 
 .PHONY: all
 all: cdgc basic
 
 .PHONY: cdgc basic
 cdgc basic:
-	$(P_MAKE) $(MAKE) --no-print-directory micro-build dil-build GC=$@
+	$(P_MAKE) $(MAKE) --no-print-directory micro-time dil-build GC=$@
 
 
 # micro
 ########
+
+micro-src := $(wildcard micro/*.d)
 
 .PHONY: micro-build
 micro-build: $(patsubst micro/%.d,$O/bin/%,$(wildcard micro/*.d))
@@ -51,11 +44,27 @@ micro-build: $(patsubst micro/%.d,$O/bin/%,$(wildcard micro/*.d))
 $O/bin/%: $O/micro/%.o
 	$(P_DC) $(DC) $(LDFLAGS) -of$@ $^
 
+.PHONY: micro-time
+micro-time: $O/time/stats.csv
+
 .PHONY: micro-stats
 micro-stats: $(patsubst micro/%.d,$O/stats/%.eps,$(wildcard micro/*.d))
 
-# special command line arguments 'split' micro benchmark
-$O/micro/split.c.csv $O/micro/split.a.csv: override args := micro/bible.txt
+# special command line arguments for 'shootout_binarytrees' micro benchmark
+$O/time/shootout_binarytrees.t.csv $O/time/shootout_binarytrees.s.csv \
+		$O/stats/shootout_binarytrees.c.csv \
+		$O/stats/shootout_binarytrees.a.csv: \
+	override args := 16
+
+# special command line arguments for 'split' micro benchmark
+$O/time/split.t.csv $O/time/split.s.csv \
+		$O/stats/split.c.csv $O/stats/split.a.csv: \
+	override args := micro/bible.txt
+
+# special command line arguments for 'voronoi' micro benchmark
+$O/time/voronoi.t.csv $O/time/voronoi.s.csv \
+		$O/stats/voronoi.c.csv $O/voronoi/split.a.csv: \
+	override args := -n 30000
 
 
 # dil
@@ -83,6 +92,27 @@ $O/bin/dil-nop: $O/bin/dil
 .PRECIOUS: $O/%.o
 $O/%.o: %.d
 	$(P_DC) $(DC) -c $(DFLAGS) -of$@ $^
+
+I := 10
+.PRECIOUS: $O/time/%.t.csv
+ifeq ($F,1)
+.PHONY: $(patsubst micro/%.d,$O/bin/%,$(wildcard micro/*.d))
+endif
+$O/time/%.t.csv: $O/bin/%
+	$P echo -n '   RUN   $* $(args) > $@ ($I)'
+	$P echo -n > $@
+	$P for i in `seq $I`; do \
+		echo -n " $$i"; \
+		time -f%e -a -o $@ ./$< $(args); \
+	   done; echo
+
+.PRECIOUS: $O/time/stats.csv
+$O/time/stats.csv: $(patsubst micro/%.d,$O/time/%.t.csv,$(micro-src))
+	$P echo -n > $@
+	$P for t in $^; do \
+		(echo -n `basename $$t`,; ./stats.py < $$t) >> $@; \
+		echo "   STATS `tail -n1 $@` >> $@"; \
+	   done
 
 .PRECIOUS: $O/stats/%.c.csv $O/stats/%.a.csv
 $O/stats/%.c.csv $O/stats/%.a.csv: $O/bin/%
