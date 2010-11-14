@@ -5,20 +5,28 @@
 
 import tango.math.random.Random;
 
-const IT = 50_000;
+const IT = 125; // number of iterations, each creates an object
+const BYTES = 1_000_000; // ~1MiB per object
+const N = 50; // ~50MiB of initial objects
+
+class C
+{
+	C c; // makes the compiler not set NO_SCAN
+	long[BYTES/long.sizeof] data;
+}
 
 void main() {
-	// The real memory use, ~55 KiB (original: ~20 MiB)
-	uint[] data;
-	data.length = 10_000; // original: 5_000_000
 	auto rand = new Random();
-	foreach (ref x; data)
-		rand(x);
+	C[] objs;
+       	objs.length = N;
+	foreach (ref o; objs) {
+		o = new C;
+		foreach (ref x; o.data)
+			rand(x);
+	}
 	for (int i = 0; i < IT; ++i) {
-		// simulate reading a few kb of data (14 KiB +/- 10 KiB)
-		uint[] incoming;
-		incoming.length = 1000 + rand.uniform!(uint) % 5000;
-		foreach (ref x; incoming)
+		C o = new C;
+		foreach (ref x; o.data)
 			rand(x);
 		// do something with the data...
 	}
