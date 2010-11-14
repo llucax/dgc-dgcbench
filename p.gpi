@@ -1,0 +1,43 @@
+#!/usr/bin/gnuplot
+
+# Terminal
+set term postscript eps monochrome solid size 4.90cm,7cm 17
+set output "/tmp/output.eps"
+
+# Style
+set style histogram rows title offset character 2, 0.25, 0
+set style fill solid 1.00 border -1
+set style data histograms
+set xtics border in scale 1,0.5 nomirror rotate by -45
+set boxwidth 0.6
+set lmargin at screen 0.19
+#set lmargin at screen 0.17
+#set lmargin at screen 0.15
+#set lmargin at screen 0.12
+set rmargin at screen 0.975
+unset key
+#set xtics font "/usr/share/fonts/truetype/msttcorefonts/arial.ttf,9"
+
+# Title
+#set title "TituloN=${n}$ ${cpus}$ CPU${'s' if cpus > 1 else ''}$"
+
+# Data format
+set datafile separator ','
+
+# Labels
+#set ylabel "Tiempo (seg)"
+#set xlabel font "/usr/share/fonts/truetype/msttcorefonts/arial.ttf,9"
+
+# Plot
+plot '/tmp/input.csv' \
+		using 2:xtic(1) title "min" \
+						lc rgb 'black', \
+		'' using (abs($3-$2-$5)) notitle \
+						lc rgb 'white', \
+		'' using ($5) title "med+/-desv" \
+						lc rgb 'gray60', \
+		'' using ($5) notitle \
+						lc rgb 'gray60', \
+		'' using (abs($4-$3-$5)) title "max" \
+						lc rgb 'white'
+
