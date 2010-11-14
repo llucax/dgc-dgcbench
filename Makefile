@@ -5,7 +5,7 @@ O        := $B/$(GC)
 DC       := ../dmd/src/dmd
 LD       := ../dmd/src/dmd
 LN       := ln
-TIME     := /usr/bin/time
+GNUPLOT  := gnuplot
 override DFLAGS ?= -release -inline -O -gc
 LDFLAGS  := -defaultlib=tango-$(GC) -debuglib=tango-$(GC)
 LIBTANGO := ../lib/libtango-$(GC).a
@@ -23,7 +23,7 @@ P_LN   = @printf '   LN    %- 40s <-  %s\n' '$@' '$<';
 endif
 
 # create build directories if they don't already exist
-dummy_mkdir := $(shell mkdir -p $O $O/bin $O/time $O/stats)
+dummy_mkdir := $(shell mkdir -p $O $O/bin $O/stats)
 
 
 ########################################################
@@ -32,27 +32,6 @@ dummy_mkdir := $(shell mkdir -p $O $O/bin $O/time $O/stats)
 
 .PHONY: all
 all: basic cdgc
-
-.PHONY: micro-time
-micro: micro-time
-
-.PHONY: dil
-dil:
-	# TODO
-
-.PHONY: micro-time
-micro-time: $B/time.eps $B/time.svg
-$B/time.%: $(patsubst micro/%.d,$B/time-%.csv,$(wildcard micro/*.d)) \
-			time-plot.tpl-gpi time-plot.sh templite.py
-	$(P_PLOT) ./time-plot.sh $* $@ $(filter %.csv,$^)
-
-.PRECIOUS: $B/time-%.csv
-$B/time-%.csv: $B/basic/time/%.csv | basic cdgc
-	$P echo -n > $@
-	$P for t in basic cdgc; do \
-		(echo -n $$t,; ./stats.py < $B/$$t/time/$*.csv) >> $@; \
-		echo "   STATS `tail -n1 $@` >> $@"; \
-	   done
 
 .PHONY: cdgc basic
 cdgc basic:
@@ -83,24 +62,18 @@ micro-gc-build: $(patsubst micro/%.d,$O/bin/%,$(wildcard micro/*.d))
 $O/bin/%: $O/micro/%.o $(LIBTANGO)
 	$(P_DC) $(DC) $(LDFLAGS) -of$@ $^
 
-.PHONY: micro-gc-time
-micro-gc-time: $(patsubst micro/%.d,$O/time/%.csv,$(wildcard micro/*.d))
-
 .PHONY: micro-gc-stats
 micro-gc-stats: $(patsubst micro/%.d,$O/stats/%.eps,$(wildcard micro/*.d))
 
 # special command line arguments for 'shootout_binarytrees' micro benchmark
-$O/time/shootout_binarytrees.csv $O/stats/shootout_binarytrees.c.csv \
-		$O/stats/shootout_binarytrees.a.csv: \
+$O/stats/shootout_binarytrees.c.csv $O/stats/shootout_binarytrees.a.csv: \
 	override args := 16
 
 # special command line arguments for 'split' micro benchmark
-$O/time/split.csv $O/stats/split.c.csv $O/stats/split.a.csv: \
-	override args := micro/bible.txt 2
+$O/stats/split.c.csv $O/stats/split.a.csv: override args := micro/bible.txt 2
 
 # special command line arguments for 'voronoi' micro benchmark
-$O/time/voronoi.csv $O/stats/voronoi.c.csv $O/voronoi/split.a.csv: \
-	override args := -n 30000
+$O/stats/voronoi.c.csv $O/voronoi/split.a.csv: override args := -n 30000
 
 
 # dil
@@ -115,9 +88,6 @@ $O/bin/dil: override DFLAGS += -Idil/src
 $O/bin/dil: $(patsubst %.d,$O/%.o,$(DIL_SRC)) $(LIBTANGO)
 	$(P_DC) $(DC) $(LDFLAGS) -L-lmpfr -L-lgmp -of$@ $^
 
-.PHONY: dil-gc-time
-dil-gc-time: $O/time/dil.csv
-
 
 # common rules
 ###############
@@ -125,19 +95,6 @@ dil-gc-time: $O/time/dil.csv
 .PRECIOUS: $O/%.o
 $O/%.o: %.d
 	$(P_DC) $(DC) -c $(DFLAGS) -of$@ $^
-
-I := 3
-.PRECIOUS: $O/time/%.csv
-ifeq ($F,1)
-.PHONY: $(patsubst micro/%.d,$O/bin/%,$(wildcard micro/*.d))
-endif
-$O/time/%.csv: $O/bin/%
-	$P echo -n '   RUN   $* $(args) > $@ ($I)'
-	$P echo -n > $@
-	$P for i in `seq $I`; do \
-		echo -n " $$i"; \
-		$(TIME) -f%e -a -o $@ ./$< $(args); \
-	done; echo
 
 .PRECIOUS: $O/stats/%.c.csv $O/stats/%.a.csv
 $O/stats/%.c.csv $O/stats/%.a.csv: $O/bin/%
