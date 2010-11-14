@@ -1,0 +1,56 @@
+#!/usr/bin/gnuplot
+
+# Terminal
+${ if 'fmt' in globals() and fmt: }$
+	${ if fmt == 'png': }$
+	set term png size 640,480
+	${: elif fmt == 'svg': }$
+	set term svg size 1600 1200 dynamic
+	${: elif fmt == 'eps': }$
+	set term postscript eps monochrome size 18cm,27cm 16
+	${:}$
+	set output "${output}$"
+${: else: }$
+set term x11 persist
+${:}$
+
+# Style
+set style histogram rows title offset character 2, 0.25, 0
+set style fill solid 1.00 border rgb 'black'
+set style data histograms
+set xtics border in scale 1,0.5 nomirror rotate by -45
+#set xtics font "/usr/share/fonts/truetype/msttcorefonts/arial.ttf,9"
+
+# Title
+set title "${title}$ [${cpus}$ CPU${'s' if cpus > 1 else ''}$]"
+
+# Data format
+set datafile separator ','
+
+# Labels
+set ylabel "Time (sec)"
+set xlabel font "/usr/share/fonts/truetype/msttcorefonts/arial.ttf,9"
+
+# Plot
+${
+def title(i, name):
+	emit('title "%s"' % name if i == 0 else 'notitle')
+def end(i):
+	emit(', \\' if i != len(progs)-1 else '')
+def at(i):
+	emit(i*4)
+}$
+plot ${ for i, (name, file) in enumerate(progs.items()): }$ \
+	newhistogram '${name}$' at ${at(i)}$, '${file}$' \
+		using 2:xtic(1) ${title(i, 'min')}$ \
+						lc rgb 'gray20', \
+		'' using (abs($3-$2-$5)) notitle \
+						lc rgb 'gray90', \
+		'' using ($5) ${title(i, 'mean+/-std')}$ \
+						lc rgb 'gray50', \
+		'' using ($5) notitle \
+						lc rgb 'gray50', \
+		'' using (abs($4-$3-$5)) ${title(i, 'max')}$ \
+						lc rgb 'gray90' ${end(i)}$
+${:}$
+
