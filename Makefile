@@ -23,7 +23,7 @@ P_LN   = @printf '   LN    %- 40s <-  %s\n' '$@' '$<';
 endif
 
 # create build directories if they don't already exist
-dummy_mkdir := $(shell mkdir -p $O $O/bin $O/stats)
+dummy_mkdir := $(shell mkdir -p $O $O/bin $O/time $O/stats $O/pause)
 
 
 ########################################################
